@@ -61,6 +61,7 @@
         },
         resizer = function() {
             windowHeight = $window.height();
+            methods.update();
         },
         methods = {
             init: function(options) {
