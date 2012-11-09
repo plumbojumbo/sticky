@@ -1,5 +1,9 @@
 // Sticky Plugin
 // =============
+// Based on Anthony Garand's jquery.sticky.js.
+// Adapted to use CSS "position: sticky" if available.
+//
+// Original credits:
 // Author: Anthony Garand
 // Improvements by German M. Bravo (Kronuz) and Ruud Kamphuis (ruudk)
 // Improvements by Leonardo C. Daronco (daronco)
@@ -22,6 +26,20 @@
         sticked = [],
         windowHeight = $window.height(),
         resizeTimeout = null,
+        cssSticky = (function(cssPrefixes) {
+            var prefixes = ['-webkit-', '-moz-', '-ms-', '-o-', ''],
+                prop = 'position',
+                value = 'sticky',
+                el = document.createElement('div');
+            for (var i = cssPrefixes.length - 1; i >= 0; i--) {
+                el.style[prop] = cssPrefixes[i] + value;
+                if (el.style.position.indexOf(value) !== -1) {
+                    cssPrefix = cssPrefixes[i];
+                    return true;
+                }
+            };
+            return null;
+        })(),
         scroller = function() {
             var scrollTop = $window.scrollTop(),
                 documentHeight = $document.height(),
@@ -75,33 +93,43 @@
                 return this.each(function() {
                     var stickyElement = $(this);
 
-                    stickyId = stickyElement.attr('id');
-                    wrapper = $('<div></div>')
-                        .attr('id', stickyId + '-sticky-wrapper')
-                        .addClass(o.wrapperClassName);
-                    stickyElement.wrapAll(wrapper);
-                    var stickyWrapper = stickyElement.parent();
-                    stickyWrapper.css('height', stickyElement.outerHeight());
-                    sticked.push({
-                        topSpacing: o.topSpacing,
-                        bottomSpacing: o.bottomSpacing,
-                        stickyElement: stickyElement,
-                        currentTop: null,
-                        stickyWrapper: stickyWrapper,
-                        className: o.className
-                    });
+                    if (cssSticky) {
+                        stickyElement.css('position', cssPrefix + 'sticky');
+                        stickyElement.css('top', o.topSpacing);
+                    } else {
+                        var stickyId = stickyElement.attr('id');
+                        wrapper = $('<div></div>')
+                            .attr('id', stickyId + '-sticky-wrapper')
+                            .addClass(o.wrapperClassName);
+                        stickyElement.wrapAll(wrapper);
+                        var stickyWrapper = stickyElement.parent();
+                        stickyWrapper.css('height', stickyElement.outerHeight());
+                        sticked.push({
+                            topSpacing: o.topSpacing,
+                            bottomSpacing: o.bottomSpacing,
+                            stickyElement: stickyElement,
+                            currentTop: null,
+                            stickyWrapper: stickyWrapper,
+                            className: o.className
+                        });
+                    }
                 });
             },
             update: scroller
         };
 
-    // should be more efficient than using $window.scroll(scroller) and $window.resize(resizer):
-    if (window.addEventListener) {
-        window.addEventListener('scroll', scroller, false);
-        window.addEventListener('resize', resizer, false);
-    } else if (window.attachEvent) {
-        window.attachEvent('onscroll', scroller);
-        window.attachEvent('onresize', resizer);
+    if (!cssSticky) {
+        // should be more efficient than using $window.scroll(scroller) and $window.resize(resizer):
+        if (window.addEventListener) {
+            window.addEventListener('scroll', scroller, false);
+            window.addEventListener('resize', resizer, false);
+        } else if (window.attachEvent) {
+            window.attachEvent('onscroll', scroller);
+            window.attachEvent('onresize', resizer);
+        }
+        $(function() {
+            setTimeout(scroller, 0);
+        });
     }
 
     $.fn.sticky = function(method) {
@@ -113,7 +141,4 @@
             $.error('Method ' + method + ' does not exist on jQuery.sticky');
         }
     };
-    $(function() {
-        setTimeout(scroller, 0);
-    });
 })(jQuery);
