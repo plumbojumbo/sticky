@@ -21,6 +21,7 @@
         $document = $(document),
         sticked = [],
         windowHeight = $window.height(),
+        resizeTimeout = null,
         scroller = function() {
             var scrollTop = $window.scrollTop(),
                 documentHeight = $document.height(),
@@ -60,8 +61,13 @@
             }
         },
         resizer = function() {
-            windowHeight = $window.height();
-            methods.update();
+            if (!resizeTimeout) {
+                windowHeight = $window.height();
+                methods.update();
+                resizeTimeout = setTimeout(function() {
+                    resizeTimeout = null;
+                }, 100);
+            }
         },
         methods = {
             init: function(options) {
