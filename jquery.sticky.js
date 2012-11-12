@@ -26,16 +26,15 @@
         sticked = [],
         windowHeight = $window.height(),
         resizeTimeout = null,
-        cssSticky = (function(cssPrefixes) {
+        cssSticky = (function() {
             var prefixes = ['-webkit-', '-moz-', '-ms-', '-o-', ''],
                 prop = 'position',
                 value = 'sticky',
                 el = document.createElement('div');
-            for (var i = cssPrefixes.length - 1; i >= 0; i--) {
-                el.style[prop] = cssPrefixes[i] + value;
+            for (var i = prefixes.length - 1; i >= 0; i--) {
+                el.style[prop] = prefixes[i] + value;
                 if (el.style.position.indexOf(value) !== -1) {
-                    cssPrefix = cssPrefixes[i];
-                    return true;
+                    return prefixes[i] + 'sticky';
                 }
             };
             return null;
@@ -94,7 +93,7 @@
                     var stickyElement = $(this);
 
                     if (cssSticky) {
-                        stickyElement.css('position', cssPrefix + 'sticky');
+                        stickyElement.css('position', cssSticky);
                         stickyElement.css('top', o.topSpacing);
                     } else {
                         var stickyId = stickyElement.attr('id');
