@@ -30,10 +30,10 @@
             var prefixes = ['-webkit-', '-moz-', '-ms-', '-o-', ''],
                 prop = 'position',
                 value = 'sticky',
-                el = document.createElement('div');
+                $el = $('<div></div>');
             for (var i = prefixes.length - 1; i >= 0; i--) {
-                el.style[prop] = prefixes[i] + value;
-                if (el.style.position.indexOf(value) !== -1) {
+                $el.css(prop, prefixes[i] + value);
+                if ($el.css(prop).indexOf(value) !== -1) {
                     return prefixes[i] + 'sticky';
                 }
             };
